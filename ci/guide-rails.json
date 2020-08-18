@@ -1,0 +1,496 @@
+{
+	"metadata": {
+		"version": 2
+	},
+	"application": {
+		"name": "buzzworthy_python",
+		"language": "PYTHON",
+		"artifact_store": {
+			"type": "s3",
+			"repositories": [
+				{
+					"category": "rc-packaging",
+					"bucket": "guide-rails-calculi-rc"
+				},
+				{
+					"category": "final-packaging",
+					"bucket": "guide-rails-calculi-final"
+				},
+				{
+					"category": "logs",
+					"bucket": "guide-rails-calculi-logs"
+				}
+			]
+		}
+	},
+	"pipeline": {
+		"segments": [
+			{
+				"name": "Build",
+				"segment_type": "build",
+				"exit_actions": {
+					"default": {
+						"fetch_logs": true,
+						"code_analysis": {
+							"publish": true,
+							"properties": null
+						},
+						"delete_instances": true
+					},
+					"on_success": {
+						"code_analysis": null
+					},
+					"on_failure": {
+						"code_analysis": null
+					},
+					"on_abort": {
+						"code_analysis": null
+					}
+				},
+				"deployment_strategy": {
+					"canary_watch_time": "",
+					"update_watch_time": "",
+					"serial": false
+				},
+				"application_init": {},
+				"packages": [
+					{
+						"name": "((application.name))",
+						"downloads": [],
+						"files": [
+							"buzz/",
+							"requirements.txt",
+							"webapp.py"
+						]
+					}
+				],
+				"instance_tags": [
+					{
+						"name": "application.name",
+						"value": "((application.name))"
+					}
+				],
+				"post_deployment_actions": {
+					"instances": null,
+					"loadbalanced": false,
+					"loadbalancer": {
+						"TargetGroupName": "",
+						"TargetGroupPort": 0,
+						"TargetGroupProtocol": "",
+						"TargetType": "",
+						"VPCID": "",
+						"HealthCheckEnabled": false,
+						"HealthCheckPort": "",
+						"UnhealthyThresholdCount": 0
+					}
+				},
+				"docker_options": {},
+				"tasks": [
+					{
+						"name": "buzzworthy_python",
+						"steps": [
+							{
+								"name": "Install dependencies",
+								"definition": "Install dependencies",
+								"command": "pip install --upgrade pip\npip install -r requirements.txt\n",
+								"properties": null
+							},
+							{
+								"name": "Run unit tests and generate reports",
+								"definition": "Run unit tests and generate reports",
+								"command": "echo \"unit testing\"\npython -m pytest -v --junit-xml test.xml  --cov=buzz --cov-report term --cov-report xml:coverage.xml tests/\nls",
+								"properties": null
+							},
+							{
+								"name": "no-op",
+								"definition": "no-op",
+								"command": "# just an empty task to kick the pipeline\nls",
+								"properties": null
+							}
+						]
+					}
+				]
+			},
+			{
+				"name": "Isolation",
+				"segment_type": "isolation",
+				"run_after": [
+					"Build"
+				],
+				"job_steps": [
+					{
+						"name": "ECHO environment",
+						"definition": "ECHO environment",
+						"command": "echo \"ECHO this environment\"\nprintenv | sort",
+						"properties": null
+					},
+					{
+						"name": "Execute test",
+						"definition": "Execute test",
+						"command": "/var/vcap/jobs/buzzworthy_python-Isolation-test/bin/isolation-test.sh",
+						"properties": null
+					}
+				],
+				"exit_actions": {
+					"default": {
+						"fetch_logs": true,
+						"code_analysis": {
+							"properties": null
+						},
+						"delete_instances": true
+					},
+					"on_success": {
+						"code_analysis": {
+							"properties": null
+						}
+					},
+					"on_failure": {
+						"code_analysis": {
+							"properties": null
+						}
+					},
+					"on_abort": {
+						"code_analysis": {
+							"properties": null
+						}
+					}
+				},
+				"deployment_files": [
+					{
+						"source_path": "ci/bin/isolation-test.sh",
+						"target_path": "bin/isolation-test.sh"
+					}
+				],
+				"deployment_strategy": {
+					"canaries": 1,
+					"max_in_flight": 1,
+					"canary_watch_time": "30000-120000",
+					"update_watch_time": "30000-120000",
+					"serial": false
+				},
+				"application_init": {},
+				"process": {
+					"init": {}
+				},
+				"package_dependencies": [
+					"((application.name))"
+				],
+				"instance_tags": [
+					{
+						"name": "application.name",
+						"value": "((application.name))"
+					}
+				],
+				"instance_groups": [
+					{
+						"name": "((application.name))",
+						"number_of_instances": 1,
+						"cloud_provider_name": "guide-rails",
+						"vm_type": "small",
+						"os_type": "default",
+						"networks": [
+							"isolation"
+						],
+						"deployment_strategy": {
+							"canaries": 1,
+							"max_in_flight": 1,
+							"canary_watch_time": "30000-120000",
+							"update_watch_time": "30000-120000",
+							"serial": true
+						},
+						"dependencies": [
+							{
+								"name": "bpm",
+								"release": "bpm",
+								"properties": []
+							}
+						]
+					}
+				],
+				"post_deployment_actions": {
+					"instances": null,
+					"loadbalanced": false,
+					"loadbalancer": {
+						"TargetGroupName": "",
+						"TargetGroupPort": 0,
+						"TargetGroupProtocol": "",
+						"TargetType": "",
+						"VPCID": "",
+						"HealthCheckEnabled": false,
+						"HealthCheckPort": "",
+						"UnhealthyThresholdCount": 0
+					}
+				}
+			},
+			{
+				"name": "Integration",
+				"segment_type": "integration",
+				"persistent": true,
+				"run_after": [
+					"Build"
+				],
+				"job_steps": [
+					{
+						"name": "Integration test",
+						"definition": "Integration test",
+						"command": "export PATH=$PATH:/home/vcap/.local/bin\nexport PYTHONPATH=/home/vcap/.local/lib/python3.5/site-packages/\n\nsleep 30\n\npytest --junit-xml=${TEST_REPORTS_DIR}/test.xml --cov-report=xml:${TEST_REPORTS_DIR}/coverage.xml --cov=${PKG_BASE_DIR}/buzzworthy_python/ ${APPLICATION_JOB_DIR}/bin/selenium-test.py",
+						"properties": null
+					}
+				],
+				"exit_actions": {
+					"default": {
+						"fetch_logs": true,
+						"code_analysis": {
+							"properties": null
+						},
+						"delete_instances": true
+					},
+					"on_success": {
+						"code_analysis": {
+							"properties": null
+						}
+					},
+					"on_failure": {
+						"code_analysis": {
+							"properties": null
+						}
+					},
+					"on_abort": {
+						"code_analysis": {
+							"properties": null
+						}
+					}
+				},
+				"properties": [
+					{
+						"name": "buzz.app_url",
+						"value": "http://localhost:5000"
+					},
+					{
+						"name": "buzz.selenium_url",
+						"value": "http://localhost:4444/wd/hub"
+					},
+					{
+						"name": "buzz.class",
+						"value": "buzz"
+					},
+					{
+						"name": "buzz.title",
+						"value": "Calculi Buzz Generator"
+					}
+				],
+				"deployment_files": [
+					{
+						"source_path": "tests/integration/selenium-test.erb",
+						"target_path": "bin/selenium-test.py"
+					}
+				],
+				"deployment_strategy": {
+					"canaries": 1,
+					"max_in_flight": 1,
+					"canary_watch_time": "60000-180000",
+					"update_watch_time": "60000-180000",
+					"serial": false
+				},
+				"application_init": {},
+				"process": {
+					"init": {}
+				},
+				"package_dependencies": [
+					"((application.name))"
+				],
+				"instance_tags": [
+					{
+						"name": "application.name",
+						"value": "((application.name))"
+					}
+				],
+				"instance_groups": [
+					{
+						"name": "((application.name))",
+						"number_of_instances": 1,
+						"cloud_provider_name": "guide-rails",
+						"vm_type": "default",
+						"os_type": "default",
+						"networks": [
+							"integration"
+						],
+						"deployment_strategy": {
+							"canary_watch_time": "30000-120000",
+							"update_watch_time": "30000-120000"
+						},
+						"dependencies": [
+							{
+								"name": "bpm",
+								"release": "bpm",
+								"properties": []
+							},
+							{
+								"name": "selenium",
+								"release": "selenium",
+								"properties": [
+									{
+										"name": "consul.servicename",
+										"value": "((consul.servicename))"
+									}
+								]
+							}
+						]
+					}
+				],
+				"post_deployment_actions": {
+					"instances": null,
+					"loadbalanced": false,
+					"loadbalancer": {
+						"TargetGroupName": "",
+						"TargetGroupPort": 0,
+						"TargetGroupProtocol": "",
+						"TargetType": "",
+						"VPCID": "",
+						"HealthCheckEnabled": false,
+						"HealthCheckPort": "",
+						"UnhealthyThresholdCount": 0
+					}
+				}
+			},
+			{
+				"name": "Production",
+				"segment_type": "production",
+				"persistent": true,
+				"run_after": [
+					"Isolation",
+					"Integration"
+				],
+				"exit_actions": {
+					"default": {
+						"fetch_logs": true,
+						"code_analysis": {
+							"properties": null
+						},
+						"delete_instances": false
+					},
+					"on_success": {
+						"code_analysis": {
+							"properties": null
+						},
+						"delete_instances": false
+					},
+					"on_failure": {
+						"code_analysis": {
+							"properties": null
+						},
+						"delete_instances": false
+					},
+					"on_abort": {
+						"code_analysis": {
+							"properties": null
+						},
+						"delete_instances": false
+					}
+				},
+				"deployment_strategy": {
+					"canaries": 1,
+					"max_in_flight": 1,
+					"canary_watch_time": "5000-30000",
+					"update_watch_time": "5000-30000",
+					"serial": false
+				},
+				"application_init": {},
+				"process": {
+					"init": {}
+				},
+				"package_dependencies": [
+					"((application.name))"
+				],
+				"instance_tags": [
+					{
+						"name": "application.name",
+						"value": "((application.name))"
+					}
+				],
+				"instance_groups": [
+					{
+						"name": "((application.name))",
+						"number_of_instances": 1,
+						"cloud_provider_name": "guide-rails",
+						"vm_type": "default",
+						"os_type": "default",
+						"networks": [
+							"production"
+						],
+						"deployment_strategy": {
+							"canaries": 1,
+							"max_in_flight": 1,
+							"canary_watch_time": "5000-30000",
+							"update_watch_time": "5000-30000",
+							"serial": false
+						},
+						"dependencies": []
+					}
+				],
+				"gated": true,
+				"post_deployment_actions": {
+					"instances": null,
+					"loadbalanced": false,
+					"loadbalancer": {
+						"TargetGroupName": "",
+						"TargetGroupPort": 0,
+						"TargetGroupProtocol": "",
+						"TargetType": "",
+						"VPCID": "",
+						"HealthCheckEnabled": false,
+						"HealthCheckPort": "",
+						"UnhealthyThresholdCount": 0
+					}
+				}
+			}
+		],
+		"exit_actions": {
+			"default": {
+				"fetch_logs": true,
+				"code_analysis": {
+					"publish": true,
+					"properties": null
+				},
+				"delete_instances": true
+			},
+			"on_success": {
+				"code_analysis": null
+			},
+			"on_failure": {
+				"code_analysis": null
+			},
+			"on_abort": {
+				"code_analysis": null
+			}
+		},
+		"default_properties": [],
+		"deployment_files": [
+			{
+				"source_path": "ci/bin/start.sh",
+				"target_path": "bin/start.sh"
+			}
+		],
+		"application_init": {},
+		"process": {
+			"init": {
+				"command": "bin/start.sh"
+			},
+			"stop": {},
+			"name": "python"
+		},
+		"releases": [
+			{
+				"name": "bpm",
+				"version": "latest"
+			},
+			{
+				"name": "selenium",
+				"version": "latest"
+			}
+		]
+	},
+	"organization": {
+		"orgname": "Tutorial"
+	}
+}
