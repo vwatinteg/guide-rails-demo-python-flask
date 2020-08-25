@@ -1,4 +1,4 @@
-## Buzzworthy-Demo-Python
+## Buzzworthy-Demo-Python application
 
 This is a working application that can be used to demonstrate how to build, test, deploy and verify a complete CI/CD pipeline using Guide-Rails®
 
