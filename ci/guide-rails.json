@@ -104,7 +104,7 @@
 							{
 								"name": "no-op",
 								"definition": "no-op",
-								"command": "# just an empty task to kick the pipeline\n",
+								"command": "# just an empty task to kick the pipeline\nls\n",
 								"properties": null
 							}
 						]
@@ -114,6 +114,7 @@
 			{
 				"name": "Isolation",
 				"segment_type": "isolation",
+				"persistent": true,
 				"run_after": [
 					"Build"
 				],
@@ -191,6 +192,10 @@
 							"isolation"
 						],
 						"deployment_strategy": {
+							"canaries": 1,
+							"max_in_flight": 1,
+							"canary_watch_time": "30000-120000",
+							"update_watch_time": "30000-120000",
 							"serial": true
 						},
 						"dependencies": [
