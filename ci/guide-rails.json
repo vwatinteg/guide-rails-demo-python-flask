@@ -104,7 +104,7 @@
 							{
 								"name": "no-op",
 								"definition": "no-op",
-								"command": "# just an empty task to kick the pipeline\nls\n",
+								"command": "# just an empty task to kick the pipeline\n",
 								"properties": null
 							}
 						]
