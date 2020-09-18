@@ -104,7 +104,7 @@
 							{
 								"name": "no-op",
 								"definition": "no-op",
-								"command": "# just an empty task to kick the pipeline",
+								"command": "# just an empty task to kick the pipeline\nls",
 								"properties": null
 							}
 						]
@@ -186,12 +186,12 @@
 						"name": "((application.name))",
 						"number_of_instances": 1,
 						"cloud_provider_name": "guide-rails-gcp-us-west2",
+						"vm_type": "default",
 						"os_type": "default",
+						"networks": [
+							"isolation"
+						],
 						"deployment_strategy": {
-							"canaries": 1,
-							"max_in_flight": 1,
-							"canary_watch_time": "30000-120000",
-							"update_watch_time": "30000-120000",
 							"serial": true
 						},
 						"dependencies": [
@@ -306,13 +306,14 @@
 						"name": "((application.name))",
 						"number_of_instances": 1,
 						"cloud_provider_name": "guide-rails-gcp-us-west2",
+						"vm_type": "default",
 						"os_type": "default",
+						"networks": [
+							"integration"
+						],
 						"deployment_strategy": {
-							"canaries": 1,
-							"max_in_flight": 1,
 							"canary_watch_time": "30000-120000",
-							"update_watch_time": "30000-120000",
-							"serial": false
+							"update_watch_time": "30000-120000"
 						},
 						"dependencies": [
 							{
@@ -408,14 +409,12 @@
 						"name": "((application.name))",
 						"number_of_instances": 1,
 						"cloud_provider_name": "guide-rails-gcp-us-west2",
+						"vm_type": "default",
 						"os_type": "default",
-						"deployment_strategy": {
-							"canaries": 1,
-							"max_in_flight": 1,
-							"canary_watch_time": "5000-30000",
-							"update_watch_time": "5000-30000",
-							"serial": false
-						},
+						"networks": [
+							"production"
+						],
+						"deployment_strategy": {},
 						"dependencies": []
 					}
 				],
