@@ -104,7 +104,7 @@
 							{
 								"name": "no-op",
 								"definition": "no-op",
-								"command": "# just an empty task to kick the pipeline\nls\n",
+								"command": "# just an empty task to kick the pipeline",
 								"properties": null
 							}
 						]
@@ -186,8 +186,7 @@
 					{
 						"name": "((application.name))",
 						"number_of_instances": 1,
-						"cloud_provider_name": "guide-rails-gcp-us-west2",
-						"vm_type": "default",
+						"cloud_provider_name": "guide-rails-gcp-us-east1",
 						"os_type": "default",
 						"networks": [
 							"isolation"
@@ -306,8 +305,7 @@
 					{
 						"name": "((application.name))",
 						"number_of_instances": 1,
-						"cloud_provider_name": "guide-rails-gcp-us-west2",
-						"vm_type": "default",
+						"cloud_provider_name": "guide-rails-gcp-us-east1",
 						"os_type": "default",
 						"networks": [
 							"integration"
@@ -409,8 +407,7 @@
 					{
 						"name": "((application.name))",
 						"number_of_instances": 1,
-						"cloud_provider_name": "guide-rails-gcp-us-west2",
-						"vm_type": "default",
+						"cloud_provider_name": "guide-rails-gcp-us-east1",
 						"os_type": "default",
 						"networks": [
 							"production"
