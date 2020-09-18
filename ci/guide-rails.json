@@ -104,7 +104,7 @@
 							{
 								"name": "no-op",
 								"definition": "no-op",
-								"command": "# just an empty task to kick the pipeline\nls",
+								"command": "# just an empty task to kick the pipeline\n",
 								"properties": null
 							}
 						]
@@ -185,8 +185,7 @@
 					{
 						"name": "((application.name))",
 						"number_of_instances": 1,
-						"cloud_provider_name": "guide-rails-gcp-us-west2",
-						"vm_type": "default",
+						"cloud_provider_name": "guide-rails-gcp-us-east1",
 						"os_type": "default",
 						"networks": [
 							"isolation"
