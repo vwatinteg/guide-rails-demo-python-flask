@@ -186,7 +186,7 @@
 					{
 						"name": "((application.name))",
 						"number_of_instances": 1,
-						"cloud_provider_name": "guide-rails-gcp-us-east1",
+						"cloud_provider_name": "guide-rails",
 						"os_type": "default",
 						"networks": [
 							"isolation"
@@ -305,7 +305,7 @@
 					{
 						"name": "((application.name))",
 						"number_of_instances": 1,
-						"cloud_provider_name": "guide-rails-gcp-us-east1",
+						"cloud_provider_name": "guide-rails",
 						"os_type": "default",
 						"networks": [
 							"integration"
@@ -407,7 +407,7 @@
 					{
 						"name": "((application.name))",
 						"number_of_instances": 1,
-						"cloud_provider_name": "guide-rails-gcp-us-east1",
+						"cloud_provider_name": "guide-rails",
 						"os_type": "default",
 						"networks": [
 							"production"
